@@ -116,23 +116,35 @@ resource "aws_instance" "bastion" {
   associate_public_ip_address = true
 
   user_data = <<-EOF
+
 #!/bin/bash
+set -e
+
+# Log everything (VERY IMPORTANT)
+exec > /var/log/user-data.log 2>&1
 
 # Update system
 yum update -y
 
-# Install AWS CLI (usually preinstalled, but safe)
-yum install -y aws-cli
+# Install required tools
+yum install -y unzip curl
 
-# Install kubectl (adjust version if needed)
+# Install AWS CLI v2 (ONLY v2)
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+./aws/install
+
+# Install kubectl
 curl -o /usr/local/bin/kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/linux/amd64/kubectl
 chmod +x /usr/local/bin/kubectl
 
 # Set region
 export AWS_DEFAULT_REGION=us-west-2
 
-# Configure kubeconfig
-aws eks update-kubeconfig --region us-west-2 --name demo-cluster
+# Run kubeconfig as ec2-user (IMPORTANT)
+sudo -u ec2-user /usr/local/bin/aws eks update-kubeconfig \
+  --region us-west-2 \
+  --name demo-cluster
 
 EOF
 
