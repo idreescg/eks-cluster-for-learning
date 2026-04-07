@@ -20,8 +20,8 @@ jobs:
           curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz
           sudo mv eksctl /usr/local/bin
 
-      - name: Create Cluster
-        run: eksctl create cluster --name demo-cluster --region us-west-2 --managed
+      #- name: Create Cluster
+      #  run: eksctl create cluster --name demo-cluster --region us-west-2 --managed
 
       - name: Map Bastion IAM Role
         run: |
