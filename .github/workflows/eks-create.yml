@@ -1,4 +1,4 @@
-name: Create EKS (Sandbox)
+name: Create EKS & BastionHost
 
 on:
   workflow_dispatch:
@@ -22,6 +22,24 @@ jobs:
 
       - name: Create Cluster
         run: eksctl create cluster --name demo-cluster --region us-west-2 --managed
+
+      - name: Map Bastion IAM Role
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
+          eksctl create iamidentitymapping \
+            --cluster demo-cluster \
+            --arn arn:aws:iam::$ACCOUNT_ID:role/bastion-eks-role \
+            --group system:masters \
+            --username ec2-user
+            
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
 
       # STEP 3: Deploy Bastion via Terraform
       - name: Terraform Init
