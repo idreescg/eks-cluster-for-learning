@@ -22,3 +22,10 @@ jobs:
 
       - name: Create Cluster
         run: eksctl create cluster --name demo-cluster --region us-west-2 --managed
+
+      # STEP 3: Deploy Bastion via Terraform
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
